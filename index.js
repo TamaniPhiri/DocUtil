@@ -2,7 +2,7 @@ let express = require('express');
 let bodyparser = require('body-parser');
 const path = require('path');
 const multer = require('multer');
-const docxtopdf = require('docx-pdf')
+let docxtopdf = require('docx-pdf')
 
 const app = express();
 
@@ -25,16 +25,16 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.post('/docxtopdf',upload.single('file'), (req, res) => {
-    console.log(req.file.path)
-    let outputfilepath=Date.now()+"output.pdf"
-    docxtopdf(req.file.path,outputfilepath,(err, res) => {
+app.post("/docxtopdf", upload.single('file'), (req, res) => {
+    console.log(req.file.path);
+    let outputfilepath = Date.now()+"output.pdf";
+    docxtopdf(req.file.path,outputfilepath,(err, result) => {
         if (err){
             console.log()
         }      
         else {
-            res.download(outputfilepath,()=>{
-                
+            result.download(outputfilepath,()=>{
+
             })
         }  
     })
