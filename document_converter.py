@@ -102,9 +102,6 @@ def main():
         cursor:pointer;
         border:solid 0.1px #00223e;
     }
-    [data-testid="stToolbar"]{
-        display:none;
-    }
     .eqdbnj015{
         background: #3e414e;
         border:solid 0.1px #00223E;
