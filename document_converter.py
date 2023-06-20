@@ -96,10 +96,14 @@ def main():
     [data-testid="stSidebar"]{
         background: #00223E;
     }
-    [data-baseweb="select"] div{
+    [data-baseweb="select"] .st-bw{
         background: #3e414e;
         color: #ffffff;
         cursor:pointer;
+        border:solid 0.1px #00223e;
+    }
+    [data-testid="stToolbar"]{
+        display:none;
     }
     .eqdbnj015{
         background: #3e414e;
