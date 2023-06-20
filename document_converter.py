@@ -1,67 +1,49 @@
 import streamlit as st
-from PyPDF2 import PdfWriter, PdfReader
-from docx import Document
+import aspose.pdf as ap
+import tempfile
 import os
 
-def convert_to_pdf(docx_file):
-    pdf_file = f"{os.path.splitext(docx_file)[0]}.pdf"
+def convert_pdf_to_doc(input_pdf, output_filename):
+    # Create a temporary file to save the uploaded PDF content
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_filepath = temp_file.name
+        temp_file.write(input_pdf.read())
 
-    document = Document(docx_file)
-    paragraphs = document.paragraphs
+    # Open PDF document from the temporary file
+    document = ap.Document(temp_filepath)
 
-    pdf_writer = PdfWriter()
-    for paragraph in paragraphs:
-        pdf_writer.add_page(paragraph._element)
+    save_options = ap.DocSaveOptions()
+    save_options.format = ap.DocSaveOptions.DocFormat.DOC_X
+    save_options.mode = ap.DocSaveOptions.RecognitionMode.FLOW
+    save_options.relative_horizontal_proximity = 2.5
+    save_options.recognize_bullets = True
 
-    with open(pdf_file, "wb") as f:
-        pdf_writer.write(f)
+    # Save the file into MS Word document format with the desired output filename
+    output_doc = output_filename + ".docx"
+    document.save(output_doc, save_options)
 
-    return pdf_file
+    # Delete the temporary file
+    os.remove(temp_filepath)
 
-def convert_to_docx(pdf_file):
-    docx_file = f"{os.path.splitext(pdf_file)[0]}.docx"
-
-    pdf_reader = PdfReader(pdf_file)
-    pdf_pages = [pdf_reader.pages[page_num].extract_text() for page_num in range(len(pdf_reader.pages))]
-
-    doc = Document()
-    for page in pdf_pages:
-        doc.add_paragraph(page)
-
-    doc.save(docx_file)
-    return docx_file
+    return output_doc
 
 def main():
     st.title("Document Converter")
+    conversion_type = st.selectbox("Select Conversion Type", ("PDF to DOCX",))
 
-    uploaded_file = st.file_uploader("Upload a document", type=["docx", "pdf"])
-    convert_format = st.selectbox("Select the conversion format", ["DOCX to PDF", "PDF to DOCX"])
+    if conversion_type == "PDF to DOCX":
+        st.subheader("Convert PDF to DOCX")
+        pdf_file = st.file_uploader("Upload PDF File", type=["pdf"])
 
-    if uploaded_file is not None:
-        file_contents = uploaded_file.getvalue()
-        file_name = uploaded_file.name
-
-        with open(file_name, "wb") as f:
-            f.write(file_contents)
-
-        status_placeholder = st.empty()
-        status_placeholder.write("Converting...")
-
-        if convert_format == "DOCX to PDF" and file_name.endswith(".docx"):
-            converted_file = convert_to_pdf(file_name)
-        elif convert_format == "PDF to DOCX" and file_name.endswith(".pdf"):
-            converted_file = convert_to_docx(file_name)
-        else:
-            st.error("Invalid file format or conversion option.")
-            return
-
-        status_placeholder.empty()
-        st.success("Conversion complete!")
-
-        # Provide the download button for the converted file
-        st.markdown(f"**Download converted file:**")
-        download_button_str = f"Download {os.path.basename(converted_file)}"
-        st.download_button(download_button_str, converted_file)
+        if pdf_file is not None:
+            output_filename = pdf_file.name.rsplit(".", 1)[0]  # Extracting the filename without extension
+            if st.button("Convert"):
+                progress_bar = st.progress(0)
+                with st.spinner("Converting..."):
+                    docx_file = convert_pdf_to_doc(pdf_file, output_filename)
+                    progress_bar.progress(100)
+                st.success("Conversion Successful!")
+                st.download_button("Download DOCX", docx_file)
 
 if __name__ == "__main__":
     main()
