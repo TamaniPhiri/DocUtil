@@ -89,6 +89,9 @@ def main():
         background: -webkit-linear-gradient(to left, #00223E, #FFA17F);
         background: linear-gradient(to right, #00223E, #FFA17F);
     }
+    [data-testid="stSidebar"]{
+        
+    }
     </style>
     """
     st.markdown(page_bg_img, unsafe_allow_html=True)
